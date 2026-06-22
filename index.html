@@ -1452,7 +1452,11 @@ function renderResults(topic, industry, goal, ctx) {
   const Y = 2025, N = [5,7,8,10][Math.floor(Math.random()*4)], P = [23,31,42,67][Math.floor(Math.random()*4)];
   const fill = t => t.replace(/{T}/g,topic).replace(/{Y}/g,Y).replace(/{N}/g,N).replace(/{P}/g,P);
 
-  allHeadlines = pool.map(([tpl, type, color]) => ({ text: fill(tpl), type, color }));
+  const templateKeys = ['authority', 'explain', 'compare', 'howto', 'trend', 'faq'];
+  allHeadlines = pool.map(([tpl, type, color], i) => ({
+    text: fill(tpl), type, color,
+    tmplKey: templateKeys[i % templateKeys.length]
+  }));
 
   const grid = document.getElementById('headlineGrid');
   grid.innerHTML = '';
@@ -1461,7 +1465,7 @@ function renderResults(topic, industry, goal, ctx) {
   document.getElementById('contentBody').textContent = '點選標題後，這裡會顯示可複製文案。';
   document.getElementById('headlineCount').textContent = `${allHeadlines.length} 個`;
 
-  allHeadlines.forEach(({ text, type, color }, i) => {
+  allHeadlines.forEach(({ text, type, color, tmplKey }, i) => {
     const div = document.createElement('div');
     div.className = 'headline-item';
     div.setAttribute('role','button'); div.setAttribute('tabindex','0');
@@ -1475,7 +1479,7 @@ function renderResults(topic, industry, goal, ctx) {
         <span class="tag tag-${color}">${type}</span>
         <button class="copy-small" onclick="event.stopPropagation();copyText('${text.replace(/'/g,"\\'")}')">複製</button>
       </div>`;
-    div.onclick = () => selectHeadline(div, text, industry, goal);
+    div.onclick = () => selectHeadline(div, text, tmplKey);
     div.onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') div.click(); };
     grid.appendChild(div);
     if (i === 0) div.click();
@@ -1502,7 +1506,7 @@ function renderResults(topic, industry, goal, ctx) {
   document.getElementById('results').scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
-function selectHeadline(div, text, industry, goal) {
+function selectHeadline(div, text, tmplKey) {
   document.querySelectorAll('.headline-item').forEach(el => {
     el.classList.remove('selected'); el.setAttribute('aria-pressed','false');
   });
@@ -1512,8 +1516,7 @@ function selectHeadline(div, text, industry, goal) {
 
   const indNames = {health:'健康醫療',tech:'科技產業',finance:'金融投資',ecommerce:'電商零售',education:'教育培訓',food:'餐飲食品',travel:'旅遊生活',general:'各產業'};
   const ind = document.getElementById('industry').value;
-  const g = document.getElementById('goal').value;
-  const tpl = CONTENT_TMPL[g] || CONTENT_TMPL.authority;
+  const tpl = CONTENT_TMPL[tmplKey] || CONTENT_TMPL.authority;
   generatedContent = tpl
     .replace(/{T}/g, currentTopic)
     .replace(/{IND}/g, indNames[ind] || '相關產業')
