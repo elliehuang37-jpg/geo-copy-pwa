@@ -1,394 +1,772 @@
-<!DOCTYPE html>
-<html lang="zh-TW">
+<!doctype html>
+<html lang="zh-Hant">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>台灣雅芳 AI 銷售智援站 C0726</title>
-<meta name="theme-color" content="#C8185A">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="雅芳智援站">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
-<link rel="manifest" href="./manifest.webmanifest">
-<link rel="icon" href="./icons/icon.svg" type="image/svg+xml">
-<link rel="apple-touch-icon" href="./icons/icon.svg">
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600&family=DM+Mono:wght@400;500&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
-<style>
-  :root {
-    --avon-red: #C8185A;
-    --avon-dark: #7A1040;
-    --avon-gold: #B5882A;
-    --bg-warm: #F5F0EC;
-    --bg-card: #FFFFFF;
-    --text-primary: #2A1A1F;
-    --text-muted: #7A6670;
-    --border: #E8DDD5;
-    --green: #2D6A4F;
-    --navy: #1A3A5C;
-  }
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#00465c">
+  <meta name="description" content="輸入關鍵字，自動產生吸睛標題與符合 SEO/GEO 原則的可複製文案。">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <title>GEO 吸睛標題與文案產生器</title>
+  <style>
+    :root {
+      --deep: #00465c;
+      --indigo: #5a548e;
+      --berry: #bd5394;
+      --coral: #ff6265;
+      --amber: #ffa300;
+      --ink: #18323d;
+      --muted: #687382;
+      --line: #ded9e5;
+      --paper: #ffffff;
+      --soft: #f8f4f8;
+      --wash: #fff8ef;
+      --shadow: 0 18px 45px rgba(48, 35, 58, .12);
+      font-family: "Noto Sans TC", "Microsoft JhengHei", "PingFang TC", system-ui, sans-serif;
+    }
 
-  * { box-sizing: border-box; margin: 0; padding: 0; }
+    * {
+      box-sizing: border-box;
+    }
 
-  body {
-    min-height: 100vh;
-    background: var(--bg-warm);
-    color: var(--text-primary);
-    font-family: "Noto Sans TC", "Microsoft JhengHei", system-ui, sans-serif;
-  }
+    body {
+      margin: 0;
+      color: var(--ink);
+      min-height: 100vh;
+      background:
+        linear-gradient(90deg, rgba(0,70,92,.10), rgba(90,84,142,.10), rgba(189,83,148,.10), rgba(255,98,101,.10), rgba(255,163,0,.12)),
+        linear-gradient(180deg, #fff8ef 0%, #faf7fb 42%, #ffffff 100%);
+    }
 
-  .header {
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    background: linear-gradient(135deg, #C8185A 0%, #7A1040 50%, #B5882A 100%);
-    box-shadow: 0 2px 12px rgba(122, 16, 64, .25);
-  }
+    button,
+    input {
+      font: inherit;
+    }
 
-  .header-top {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 16px;
-    padding: 14px 24px 10px;
-  }
+    button {
+      cursor: pointer;
+    }
 
-  .header-brand {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    min-width: 0;
-  }
+    .app {
+      width: min(1180px, calc(100% - 28px));
+      margin: 0 auto;
+      padding: 22px 0 44px;
+    }
 
-  .avon-logo {
-    flex: 0 0 auto;
-    background: #fff;
-    color: var(--avon-red);
-    font-family: "Cormorant Garamond", serif;
-    font-size: 18px;
-    font-weight: 600;
-    letter-spacing: 3px;
-    padding: 4px 12px;
-    border-radius: 3px;
-  }
+    .palette {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      height: 14px;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 10px 24px rgba(48, 35, 58, .14);
+      margin-bottom: 18px;
+    }
 
-  .header-title {
-    color: rgba(255,255,255,.92);
-    font-size: 13px;
-    font-weight: 500;
-    letter-spacing: 1px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
+    .palette span:nth-child(1) { background: var(--deep); }
+    .palette span:nth-child(2) { background: var(--indigo); }
+    .palette span:nth-child(3) { background: var(--berry); }
+    .palette span:nth-child(4) { background: var(--coral); }
+    .palette span:nth-child(5) { background: var(--amber); }
 
-  .header-meta { text-align: right; flex: 0 0 auto; }
+    .hero {
+      display: grid;
+      grid-template-columns: minmax(0, .88fr) minmax(420px, 1.12fr);
+      gap: 18px;
+      margin-bottom: 18px;
+    }
 
-  .header-period {
-    color: #FFE5B4;
-    font-family: "DM Mono", monospace;
-    font-size: 20px;
-    font-weight: 500;
-    letter-spacing: 1px;
-  }
+    .intro,
+    .generator,
+    .panel {
+      background: rgba(255,255,255,.94);
+      border: 1px solid rgba(222,217,229,.92);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+    }
 
-  .header-date {
-    color: rgba(255,255,255,.72);
-    font-size: 12px;
-    margin-top: 2px;
-  }
+    .intro {
+      padding: 26px;
+      background:
+        linear-gradient(135deg, rgba(0,70,92,.08), transparent 34%),
+        linear-gradient(315deg, rgba(255,163,0,.16), rgba(255,98,101,.07) 38%, rgba(255,255,255,.96) 64%);
+    }
 
-  .header-theme {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    background: rgba(255,255,255,.12);
-    color: rgba(255,255,255,.88);
-    font-size: 12px;
-    letter-spacing: 2px;
-    padding: 6px 24px;
-    text-align: center;
-  }
+    .eyebrow {
+      margin: 0 0 12px;
+      color: var(--berry);
+      font-size: 13px;
+      font-weight: 900;
+      letter-spacing: .05em;
+      text-transform: uppercase;
+    }
 
-  .theme-dot {
-    width: 6px;
-    height: 6px;
-    background: #FFE5B4;
-    border-radius: 50%;
-    flex: 0 0 auto;
-  }
+    h1 {
+      margin: 0;
+      color: var(--deep);
+      font-size: clamp(32px, 5vw, 58px);
+      line-height: 1.05;
+      letter-spacing: 0;
+    }
 
-  .tabs {
-    display: flex;
-    gap: 0;
-    overflow-x: auto;
-    padding: 0 20px;
-    background: #fff;
-    border-bottom: 1px solid var(--border);
-    scrollbar-width: none;
-  }
+    .lead {
+      margin: 16px 0 0;
+      color: #4c5365;
+      font-size: 16px;
+      line-height: 1.75;
+    }
 
-  .tabs::-webkit-scrollbar { display: none; }
+    .rule-grid {
+      display: grid;
+      gap: 10px;
+      margin-top: 24px;
+    }
 
-  .tab {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    padding: 14px 20px 12px;
-    border-bottom: 3px solid transparent;
-    color: var(--text-muted);
-    cursor: pointer;
-    font-size: 14px;
-    font-weight: 500;
-    white-space: nowrap;
-    user-select: none;
-    transition: color .2s, border-color .2s;
-  }
+    .rule {
+      display: grid;
+      grid-template-columns: 10px 1fr;
+      gap: 10px;
+      color: #3b4557;
+      font-size: 14px;
+      line-height: 1.55;
+    }
 
-  .tab:hover { color: var(--avon-red); }
+    .rule::before {
+      content: "";
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      margin-top: 6px;
+      background: var(--coral);
+    }
 
-  .tab.active {
-    color: var(--avon-red);
-    border-bottom-color: var(--avon-red);
-    font-weight: 700;
-  }
+    .rule:nth-child(2)::before { background: var(--berry); }
+    .rule:nth-child(3)::before { background: var(--amber); }
 
-  .content {
-    max-width: 900px;
-    margin: 0 auto;
-    padding: 20px;
-  }
+    .generator {
+      padding: 20px;
+    }
 
-  .tab-panel { display: none; }
-  .tab-panel.active { display: block; }
+    label {
+      display: block;
+      margin-bottom: 8px;
+      color: #39435a;
+      font-size: 14px;
+      font-weight: 900;
+    }
 
-  .section-title {
-    color: var(--avon-dark);
-    font-family: "Cormorant Garamond", "Noto Sans TC", serif;
-    font-size: 22px;
-    font-weight: 600;
-    margin-bottom: 4px;
-  }
+    .search-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 10px;
+    }
 
-  .section-sub {
-    color: var(--text-muted);
-    font-size: 13px;
-    line-height: 1.6;
-    margin-bottom: 20px;
-  }
+    input {
+      width: 100%;
+      border: 1px solid #d7d1df;
+      border-radius: 8px;
+      background: #fff;
+      color: var(--ink);
+      padding: 13px 14px;
+      outline: none;
+      transition: border-color .18s ease, box-shadow .18s ease;
+    }
 
-  .empty-state {
-    background: var(--bg-card);
-    border: 2px dashed var(--border);
-    border-radius: 12px;
-    padding: 34px 24px;
-    text-align: center;
-  }
+    input:focus {
+      border-color: var(--berry);
+      box-shadow: 0 0 0 3px rgba(189,83,148,.15);
+    }
 
-  .empty-icon {
-    color: var(--avon-red);
-    font-size: 34px;
-    margin-bottom: 12px;
-  }
+    .btn {
+      min-height: 44px;
+      border: 0;
+      border-radius: 8px;
+      padding: 10px 14px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-weight: 900;
+      white-space: nowrap;
+    }
 
-  .empty-title {
-    color: var(--text-primary);
-    font-size: 17px;
-    font-weight: 700;
-    margin-bottom: 8px;
-  }
+    .btn.primary {
+      color: #fff;
+      background: var(--deep);
+      box-shadow: 0 10px 22px rgba(0,70,92,.22);
+    }
 
-  .empty-copy {
-    color: var(--text-muted);
-    font-size: 13px;
-    line-height: 1.7;
-    max-width: 520px;
-    margin: 0 auto;
-  }
+    .btn.secondary {
+      color: #513400;
+      background: #ffe2a6;
+    }
 
-  .prep-list {
-    display: grid;
-    gap: 10px;
-    margin-top: 18px;
-    text-align: left;
-  }
+    .btn.ghost {
+      border: 1px solid var(--line);
+      color: #4b416d;
+      background: transparent;
+    }
 
-  .prep-item {
-    background: #FFF8F0;
-    border-left: 3px solid var(--avon-gold);
-    border-radius: 0 8px 8px 0;
-    color: #6B4A00;
-    font-size: 13px;
-    line-height: 1.6;
-    padding: 10px 12px;
-  }
+    .btn.small {
+      min-height: 34px;
+      padding: 7px 10px;
+      font-size: 13px;
+    }
 
-  .footer {
-    border-top: 1px solid var(--border);
-    color: var(--text-muted);
-    font-size: 11px;
-    line-height: 1.7;
-    margin-top: 30px;
-    padding: 20px;
-    text-align: center;
-  }
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 12px;
+    }
 
-  @media (max-width: 600px) {
-    .header-top { align-items: flex-start; padding: 12px 14px 9px; }
-    .header-brand { flex-direction: column; align-items: flex-start; gap: 6px; }
-    .header-title { white-space: normal; }
-    .header-period { font-size: 16px; }
-    .tabs { padding: 0 10px; }
-    .tab { padding: 13px 14px 11px; font-size: 13px; }
-    .content { padding: 16px; }
-  }
-</style>
+    .chip {
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 7px 10px;
+      color: #4b416d;
+      background: #fff;
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .helper {
+      margin: 14px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.55;
+    }
+
+    .workspace {
+      display: grid;
+      grid-template-columns: minmax(320px, .9fr) minmax(0, 1.1fr);
+      gap: 18px;
+      align-items: start;
+    }
+
+    .panel {
+      overflow: hidden;
+    }
+
+    .panel-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 14px;
+      align-items: start;
+      padding: 18px 20px;
+      border-bottom: 1px solid var(--line);
+      background: #fff;
+    }
+
+    h2 {
+      margin: 0;
+      color: var(--deep);
+      font-size: 22px;
+      letter-spacing: 0;
+    }
+
+    .sub {
+      margin: 6px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.55;
+    }
+
+    .list,
+    .copy-list {
+      display: grid;
+      gap: 12px;
+      padding: 18px 20px 20px;
+    }
+
+    .title-card,
+    .copy-card {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: linear-gradient(180deg, #fff, #fff9f4);
+      padding: 14px;
+    }
+
+    .title-card {
+      text-align: left;
+      width: 100%;
+      color: inherit;
+      transition: border-color .18s ease, transform .18s ease, box-shadow .18s ease;
+    }
+
+    .title-card:hover,
+    .title-card.active {
+      border-color: var(--coral);
+      transform: translateY(-1px);
+      box-shadow: 0 12px 24px rgba(255,98,101,.12);
+    }
+
+    .title-main,
+    .copy-head {
+      display: flex;
+      gap: 10px;
+      align-items: start;
+      justify-content: space-between;
+    }
+
+    .title-text {
+      display: grid;
+      grid-template-columns: 30px 1fr;
+      gap: 10px;
+      align-items: start;
+      color: #24394a;
+      font-weight: 900;
+      line-height: 1.45;
+    }
+
+    .num {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      color: #fff;
+      background: var(--indigo);
+      font-size: 13px;
+      font-weight: 900;
+    }
+
+    .title-card:nth-child(5n+2) .num,
+    .copy-card:nth-child(5n+2) .num { background: var(--berry); }
+    .title-card:nth-child(5n+3) .num,
+    .copy-card:nth-child(5n+3) .num { background: var(--coral); }
+    .title-card:nth-child(5n+4) .num,
+    .copy-card:nth-child(5n+4) .num { background: var(--amber); color: #4a2b00; }
+    .title-card:nth-child(5n+5) .num,
+    .copy-card:nth-child(5n+5) .num { background: var(--deep); }
+
+    .meta {
+      display: inline-flex;
+      width: fit-content;
+      border-radius: 999px;
+      padding: 4px 9px;
+      background: #f4e8f3;
+      color: #684070;
+      font-size: 12px;
+      font-weight: 900;
+      margin: 10px 0 0 40px;
+    }
+
+    .copy-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 8px 0 10px;
+    }
+
+    .tag {
+      display: inline-flex;
+      border-radius: 999px;
+      padding: 4px 9px;
+      background: #f4e8f3;
+      color: #684070;
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    pre {
+      margin: 0;
+      white-space: pre-wrap;
+      word-break: break-word;
+      color: #3f4857;
+      line-height: 1.7;
+      font-family: "Noto Sans TC", "Microsoft JhengHei", system-ui, sans-serif;
+      font-size: 14px;
+    }
+
+    .empty {
+      margin: 18px 20px 20px;
+      border: 1px dashed #cabed2;
+      border-radius: 8px;
+      background: rgba(255,255,255,.82);
+      color: var(--muted);
+      padding: 28px;
+      text-align: center;
+      line-height: 1.7;
+    }
+
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: 22px;
+      transform: translateX(-50%) translateY(16px);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .18s ease, transform .18s ease;
+      color: #fff;
+      background: var(--deep);
+      border-radius: 999px;
+      padding: 10px 14px;
+      z-index: 20;
+      font-size: 14px;
+      box-shadow: 0 10px 24px rgba(0,70,92,.22);
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    @media (max-width: 960px) {
+      .hero,
+      .workspace {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .app {
+        width: min(100% - 22px, 1180px);
+        padding-top: 16px;
+      }
+
+      .intro,
+      .generator {
+        padding: 16px;
+      }
+
+      .search-row,
+      .panel-head {
+        grid-template-columns: 1fr;
+        display: grid;
+      }
+
+      .panel-head .btn,
+      .search-row .btn {
+        width: 100%;
+      }
+    }
+  </style>
 </head>
 <body>
-
-<div class="header">
-  <div class="header-top">
-    <div class="header-brand">
-      <div class="avon-logo">AVON</div>
-      <div class="header-title">AI 銷售智援站</div>
+  <main class="app">
+    <div class="palette" aria-hidden="true">
+      <span></span><span></span><span></span><span></span><span></span>
     </div>
-    <div class="header-meta">
-      <div class="header-period">第7期 C0726</div>
-      <div class="header-date">2026 / 7/1 - 7/31</div>
-    </div>
-  </div>
-  <div class="header-theme">
-    <span class="theme-dot"></span>
-    M7 內容建置中 · 等待正確產品與活動資料匯入
-    <span class="theme-dot"></span>
-  </div>
-</div>
 
-<div class="tabs" id="tabBar">
-  <div class="tab active" onclick="switchTab('activity')">🎯 活動</div>
-  <div class="tab" onclick="switchTab('product')">✨ 商品</div>
-  <div class="tab" onclick="switchTab('net')">🏷️ 淨價特刊</div>
-  <div class="tab" onclick="switchTab('script')">💬 銷售話術</div>
-  <div class="tab" onclick="switchTab('testimonial')">🌟 現場見證</div>
-  <div class="tab" onclick="switchTab('edm')">📋 活動 EDM</div>
-  <div class="tab" onclick="switchTab('beautyedu')">💧 美容教育</div>
-  <div class="tab" onclick="switchTab('nutritionedu')">🥗 營養教育</div>
-</div>
+    <section class="hero">
+      <div class="intro">
+        <p class="eyebrow">PWA GEO Copy Generator</p>
+        <h1>輸入關鍵字，生成 AI 想引用的內容</h1>
+        <p class="lead">輸入一個關鍵字，先產生 10 個吸睛標題。點選任一標題後，工具會依 SEO 與 GEO 原則產生 5 則可複製文案。</p>
+        <div class="rule-grid">
+          <div class="rule">SEO：關鍵字清楚、搜尋意圖明確、標題可對應內容段落。</div>
+          <div class="rule">GEO：用問答、比較、定義與證據語境，讓 AI 更容易理解與引用。</div>
+          <div class="rule">PWA：上架 GitHub Pages 後可安裝到手機或桌面，並支援基礎離線快取。</div>
+        </div>
+      </div>
 
-<div class="content">
-  <div class="tab-panel active" id="panel-activity">
-    <div class="section-title">活動</div>
-    <div class="section-sub">M7 活動規則、期間、門檻、贈品與注意事項待匯入。</div>
-    <div class="empty-state">
-      <div class="empty-icon">🎯</div>
-      <div class="empty-title">活動內容已清空</div>
-      <div class="empty-copy">保留活動卡片頁面位置，待正確 M7 活動訊息確認後再建立可展開的活動卡。</div>
-    </div>
-  </div>
+      <form class="generator" id="keywordForm">
+        <label for="keyword">輸入關鍵字</label>
+        <div class="search-row">
+          <input id="keyword" autocomplete="off" placeholder="例：雅芳益生菌、女性健康、AI 轉型顧問">
+          <button class="btn primary" type="submit">產生標題</button>
+        </div>
+        <div class="chips" aria-label="範例關鍵字">
+          <button class="chip" type="button" data-keyword="雅芳益生菌">雅芳益生菌</button>
+          <button class="chip" type="button" data-keyword="女性健康社群">女性健康社群</button>
+          <button class="chip" type="button" data-keyword="AI 轉型顧問">AI 轉型顧問</button>
+          <button class="chip" type="button" data-keyword="Her Aurora 女性成長">Her Aurora 女性成長</button>
+        </div>
+        <p class="helper">流程：輸入關鍵字 → 產生 10 個標題 → 點選標題 → 產生 5 則符合 SEO/GEO 原則的文案。</p>
+      </form>
+    </section>
 
-  <div class="tab-panel" id="panel-product">
-    <div class="section-title">商品</div>
-    <div class="section-sub">M7 重點商品、價格、貨號、賣點與銷售話術待匯入。</div>
-    <div class="empty-state">
-      <div class="empty-icon">✨</div>
-      <div class="empty-title">商品資料已清空</div>
-      <div class="empty-copy">原產品資料先移除，避免直銷商看到錯誤商品資訊。收到正確 M7 商品表後再建立商品卡。</div>
-    </div>
-  </div>
+    <section class="workspace">
+      <div class="panel">
+        <div class="panel-head">
+          <div>
+            <h2>吸睛標題 10 個</h2>
+            <p class="sub">點選標題後，右側會自動生成 5 則 GEO 文案。</p>
+          </div>
+          <button class="btn small ghost" type="button" id="copyTitles">複製全部標題</button>
+        </div>
+        <div id="titlesArea">
+          <div class="empty">請先輸入關鍵字並產生標題。</div>
+        </div>
+      </div>
 
-  <div class="tab-panel" id="panel-net">
-    <div class="section-title">淨價特刊</div>
-    <div class="section-sub">M7 淨價品項、分類、貨號、推薦售價與淨價待匯入。</div>
-    <div class="empty-state">
-      <div class="empty-icon">🏷️</div>
-      <div class="empty-title">淨價資料已清空</div>
-      <div class="empty-copy">保留搜尋與篩選頁面位置，待正確 M7 淨價資料匯入後再啟用查詢。</div>
-    </div>
-  </div>
+      <div class="panel">
+        <div class="panel-head">
+          <div>
+            <h2>符合 SEO/GEO 原則的文案 5 則</h2>
+            <p class="sub" id="selectedTitle">請先點選左側任一標題。</p>
+          </div>
+          <button class="btn small primary" type="button" id="copyCopies">複製全部文案</button>
+        </div>
+        <div id="copiesArea">
+          <div class="empty">點選標題後，這裡會顯示 5 則可複製文案。</div>
+        </div>
+      </div>
+    </section>
+  </main>
 
-  <div class="tab-panel" id="panel-script">
-    <div class="section-title">銷售話術</div>
-    <div class="section-sub">M7 開場、介紹、異議處理、促成與搭單話術待匯入。</div>
-    <div class="empty-state">
-      <div class="empty-icon">💬</div>
-      <div class="empty-title">銷售話術已清空</div>
-      <div class="empty-copy">待商品與活動資料確認後，再依 M7 主打品與促銷節奏產生話術。</div>
-    </div>
-  </div>
+  <div class="toast" id="toast" role="status" aria-live="polite">已複製</div>
 
-  <div class="tab-panel" id="panel-testimonial">
-    <div class="section-title">現場見證</div>
-    <div class="section-sub">真實客戶見證素材待匯入。禁止填入未確認或假見證。</div>
-    <div class="empty-state">
-      <div class="empty-icon">🌟</div>
-      <div class="empty-title">見證內容已清空</div>
-      <div class="empty-copy">保留版型位置，待 M7 真實見證素材收集後再填入。</div>
-    </div>
-  </div>
+  <script>
+    const state = {
+      keyword: "",
+      activeTitleIndex: -1,
+      titles: [],
+      copies: []
+    };
 
-  <div class="tab-panel" id="panel-edm">
-    <div class="section-title">活動 EDM</div>
-    <div class="section-sub">M7 對客版活動圖、產品圖與 QR code 圖待匯入。</div>
-    <div class="empty-state">
-      <div class="empty-icon">📋</div>
-      <div class="empty-title">EDM 內容已清空</div>
-      <div class="empty-copy">原 EDM 先移除，待 M7 最終版圖檔確認後再放入。</div>
-    </div>
-  </div>
+    const keywordForm = document.querySelector("#keywordForm");
+    const keywordInput = document.querySelector("#keyword");
+    const titlesArea = document.querySelector("#titlesArea");
+    const copiesArea = document.querySelector("#copiesArea");
+    const selectedTitle = document.querySelector("#selectedTitle");
+    const toast = document.querySelector("#toast");
+    const copyTitles = document.querySelector("#copyTitles");
+    const copyCopies = document.querySelector("#copyCopies");
 
-  <div class="tab-panel" id="panel-beautyedu">
-    <div class="section-title">美容教育</div>
-    <div class="section-sub">M7 美容教育教材待匯入。</div>
-    <div class="empty-state">
-      <div class="empty-icon">💧</div>
-      <div class="empty-title">美容教育內容已清空</div>
-      <div class="empty-copy">保留教育頁面入口，待確認正確 M7 美容教育資料後再放入。</div>
-    </div>
-  </div>
-
-  <div class="tab-panel" id="panel-nutritionedu">
-    <div class="section-title">營養教育</div>
-    <div class="section-sub">M7 營養教育教材待匯入。</div>
-    <div class="empty-state">
-      <div class="empty-icon">🥗</div>
-      <div class="empty-title">營養教育內容已清空</div>
-      <div class="empty-copy">保留教育頁面入口，待確認正確 M7 營養教育資料後再放入。</div>
-    </div>
-  </div>
-
-  <div class="empty-state" style="margin-top: 22px;">
-    <div class="empty-title">M7 匯入準備清單</div>
-    <div class="prep-list">
-      <div class="prep-item">1. 上傳正確 M7 產品資料：商品名稱、貨號、推薦售價、優惠價、重點賣點。</div>
-      <div class="prep-item">2. 上傳正確 M7 活動資料：活動期間、門檻、折扣、贈品、限制條件。</div>
-      <div class="prep-item">3. 確認是否要放入美容教育、營養教育與 EDM 圖檔。</div>
-    </div>
-  </div>
-</div>
-
-<div class="footer">
-  台灣雅芳直銷商銷售支援系統 · 第7期 C0726 · M7 內容建置中<br>
-  本文件僅供內部銷售支援使用，資料以公司正式公告為準
-</div>
-
-<script>
-const tabs = ["activity", "product", "net", "script", "testimonial", "edm", "beautyedu", "nutritionedu"];
-
-function switchTab(tab) {
-  const index = tabs.indexOf(tab);
-  if (index < 0) return;
-  document.querySelectorAll(".tab").forEach(item => item.classList.remove("active"));
-  document.querySelectorAll(".tab-panel").forEach(panel => panel.classList.remove("active"));
-  document.querySelectorAll(".tab")[index].classList.add("active");
-  document.getElementById("panel-" + tab).classList.add("active");
-}
-
-if ("serviceWorker" in navigator) {
-  window.addEventListener("load", () => {
-    navigator.serviceWorker.register("./sw.js").catch(error => {
-      console.warn("Service worker registration failed:", error);
+    keywordForm.addEventListener("submit", (event) => {
+      event.preventDefault();
+      generateTitles();
     });
-  });
-}
-</script>
+
+    document.querySelectorAll("[data-keyword]").forEach((button) => {
+      button.addEventListener("click", () => {
+        keywordInput.value = button.dataset.keyword;
+        generateTitles();
+      });
+    });
+
+    document.addEventListener("click", (event) => {
+      const copyButton = event.target.closest("[data-copy]");
+      if (copyButton) {
+        const target = document.getElementById(copyButton.dataset.copy);
+        if (target) copyText(target.innerText);
+      }
+
+      const titleButton = event.target.closest("[data-title-index]");
+      if (titleButton) {
+        selectTitle(Number(titleButton.dataset.titleIndex));
+      }
+    });
+
+    copyTitles.addEventListener("click", () => {
+      if (!state.titles.length) return showToast("目前還沒有標題");
+      copyText(state.titles.map((item, index) => `${index + 1}. ${item.title}\n意圖：${item.intent}\n理由：${item.reason}`).join("\n\n"));
+    });
+
+    copyCopies.addEventListener("click", () => {
+      if (!state.copies.length) return showToast("目前還沒有文案");
+      copyText(formatCopies(state.copies));
+    });
+
+    function generateTitles() {
+      const keyword = clean(keywordInput.value);
+      if (!keyword) {
+        showToast("請先輸入關鍵字");
+        return;
+      }
+
+      state.keyword = keyword;
+      state.activeTitleIndex = -1;
+      state.titles = buildTitles(keyword);
+      state.copies = [];
+      renderTitles();
+      renderCopies();
+      showToast("已產生 10 個標題");
+    }
+
+    function selectTitle(index) {
+      state.activeTitleIndex = index;
+      const selected = state.titles[index];
+      state.copies = buildGeoCopies(state.keyword, selected.title);
+      selectedTitle.textContent = `已選標題：${selected.title}`;
+      renderTitles();
+      renderCopies();
+      showToast("已產生 5 則 GEO 文案");
+    }
+
+    function renderTitles() {
+      if (!state.titles.length) {
+        titlesArea.innerHTML = '<div class="empty">請先輸入關鍵字並產生標題。</div>';
+        return;
+      }
+
+      titlesArea.innerHTML = `<div class="list">${state.titles.map((item, index) => `
+        <button class="title-card ${state.activeTitleIndex === index ? "active" : ""}" type="button" data-title-index="${index}">
+          <div class="title-main">
+            <div class="title-text">
+              <span class="num">${index + 1}</span>
+              <span>${escapeHtml(item.title)}</span>
+            </div>
+          </div>
+          <span class="meta">${escapeHtml(item.intent)}</span>
+          <p class="sub">${escapeHtml(item.reason)}</p>
+        </button>
+      `).join("")}</div>`;
+    }
+
+    function renderCopies() {
+      if (!state.copies.length) {
+        copiesArea.innerHTML = '<div class="empty">點選標題後，這裡會顯示 5 則可複製文案。</div>';
+        selectedTitle.textContent = "請先點選左側任一標題。";
+        return;
+      }
+
+      copiesArea.innerHTML = `<div class="copy-list">${state.copies.map((item, index) => `
+        <article class="copy-card">
+          <div class="copy-head">
+            <div class="title-text">
+              <span class="num">${index + 1}</span>
+              <span>${escapeHtml(item.title)}</span>
+            </div>
+            <button class="btn small secondary" type="button" data-copy="copy${index}">複製</button>
+          </div>
+          <div class="copy-meta">
+            <span class="tag">${escapeHtml(item.seo)}</span>
+            <span class="tag">${escapeHtml(item.geo)}</span>
+          </div>
+          <pre id="copy${index}">${escapeHtml(item.text)}</pre>
+        </article>
+      `).join("")}</div>`;
+    }
+
+    function buildTitles(keyword) {
+      return [
+        {
+          intent: "問題型｜認知階段",
+          title: `${keyword} 是什麼？一次看懂適合誰、怎麼選、常見問題`,
+          reason: "用定義型標題承接資訊搜尋，讓 AI 容易判斷主題邊界。"
+        },
+        {
+          intent: "方法型｜考慮階段",
+          title: `如何用 ${keyword} 解決你的核心需求？3 個判斷標準`,
+          reason: "用 How-to 結構對應使用者行動需求，適合 SEO 教學內容。"
+        },
+        {
+          intent: "比較型｜考慮階段",
+          title: `${keyword} 推薦前必看：適合誰、不適合誰、差異在哪裡`,
+          reason: "AI 常引用比較與推薦語境，能提升 GEO 可見度。"
+        },
+        {
+          intent: "清單型｜高點擊",
+          title: `${keyword} 的 10 個常見疑問：購買或使用前先看這篇`,
+          reason: "清單型標題具備掃讀性，也利於 FAQ 段落被引用。"
+        },
+        {
+          intent: "決策型｜轉換前",
+          title: `不要急著選 ${keyword}，先確認這 5 件事`,
+          reason: "用反直覺鉤子提高點擊，同時建立專業顧問感。"
+        },
+        {
+          intent: "痛點型｜受眾共鳴",
+          title: `為什麼你需要 ${keyword}？從痛點、情境到解方完整拆解`,
+          reason: "先談痛點再談解法，符合 GEO 的情境式提問邏輯。"
+        },
+        {
+          intent: "證據型｜品牌可信度",
+          title: `${keyword} 值得相信嗎？從專業證據與使用情境看懂`,
+          reason: "強化 E-E-A-T 與品牌證據，讓 AI 更容易視為可信來源。"
+        },
+        {
+          intent: "地區/場景型｜精準流量",
+          title: `想找 ${keyword}？不同需求的人該怎麼選`,
+          reason: "用需求分眾承接精準搜尋，適合延伸地區與場景內容。"
+        },
+        {
+          intent: "AI 提問型｜GEO",
+          title: `如果問 AI「${keyword} 怎麼選」，答案應該包含哪些重點？`,
+          reason: "直接對齊 AI 搜尋語境，提升被 AI 摘要引用的機率。"
+        },
+        {
+          intent: "短影音鉤子｜社群導流",
+          title: `${keyword} 不是每個人都適合：先看你是不是這 3 種人`,
+          reason: "具備短影音停留鉤子，也能導回文章或私域諮詢。"
+        }
+      ];
+    }
+
+    function buildGeoCopies(keyword, title) {
+      return [
+        {
+          title: "定義型文案",
+          seo: "SEO：首段包含主關鍵字",
+          geo: "GEO：清楚定義主題邊界",
+          text: `${title}\n\n${keyword} 的核心，不只是「大家都在搜尋什麼」，而是使用者真正想解決什麼問題。若要讓 AI 願意引用這段內容，第一段要先清楚說明 ${keyword} 是什麼、適合哪些情境，以及它能協助使用者完成什麼決策。這能同時滿足搜尋引擎的主題判斷，也讓 AI 更容易把內容整理成答案。`
+        },
+        {
+          title: "比較推薦型文案",
+          seo: "SEO：對應推薦/比較意圖",
+          geo: "GEO：提供可判斷的推薦理由",
+          text: `如果使用者正在比較 ${keyword}，內容不應只寫「推薦」兩個字，而要提供清楚的判斷標準。建議從三個面向說明：第一，誰最適合；第二，什麼情境下效果最好；第三，和其他選擇相比差異在哪裡。AI 在生成推薦清單時，最需要這種可比較、可引用、可驗證的資訊。`
+        },
+        {
+          title: "FAQ 問答型文案",
+          seo: "SEO：承接長尾問題",
+          geo: "GEO：用問答格式提升可引用性",
+          text: `Q：${keyword} 適合我嗎？\nA：先看你的需求是否明確。如果你正在尋找一個能解決特定痛點、協助比較選項，或做出購買/使用決策的方案，那麼 ${keyword} 值得納入評估。建議內容要補上適合誰、不適合誰、常見誤解與下一步行動，讓 AI 可以直接引用成完整回答。`
+        },
+        {
+          title: "證據與可信度文案",
+          seo: "SEO：強化 E-E-A-T",
+          geo: "GEO：建立品牌與內容可信度",
+          text: `GEO 的重點不是把 SEO 文章改寫給 AI 看，而是讓 AI 相信這段內容值得被推薦。談 ${keyword} 時，建議加入專業背景、真實案例、使用情境、常見問題與第三方證據。當內容能持續回答使用者問題，AI 才更容易把它視為可信的知識資產，而不是一次性的促銷文。`
+        },
+        {
+          title: "行動轉換型文案",
+          seo: "SEO：滿足決策型搜尋",
+          geo: "GEO：從答案自然導向下一步",
+          text: `如果你已經在研究 ${keyword}，下一步不是立刻下決定，而是先列出自己的需求、預算、使用情境與期待成果。這篇內容會協助你用更清楚的方式判斷 ${keyword} 是否適合你，並提供下一步可行動的檢查清單。好的 GEO 文案不是硬性推銷，而是在可信答案之後，提供自然且明確的行動方向。`
+        }
+      ];
+    }
+
+    function formatCopies(copies) {
+      return copies.map((item, index) => `${index + 1}. ${item.title}\n${item.seo}\n${item.geo}\n\n${item.text}`).join("\n\n---\n\n");
+    }
+
+    async function copyText(text) {
+      try {
+        await navigator.clipboard.writeText(text);
+      } catch (error) {
+        const helper = document.createElement("textarea");
+        helper.value = text;
+        helper.setAttribute("readonly", "");
+        helper.style.position = "fixed";
+        helper.style.opacity = "0";
+        document.body.appendChild(helper);
+        helper.select();
+        document.execCommand("copy");
+        helper.remove();
+      }
+      showToast("已複製到剪貼簿");
+    }
+
+    function showToast(message) {
+      toast.textContent = message;
+      toast.classList.add("show");
+      window.clearTimeout(showToast.timer);
+      showToast.timer = window.setTimeout(() => toast.classList.remove("show"), 1800);
+    }
+
+    function clean(value) {
+      return String(value || "").replace(/\s+/g, " ").trim();
+    }
+
+    function escapeHtml(value) {
+      return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    if ("serviceWorker" in navigator && location.protocol !== "file:") {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register("./sw.js").catch(() => {});
+      });
+    }
+  </script>
 </body>
 </html>
